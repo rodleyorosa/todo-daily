@@ -37,25 +37,36 @@ function App() {
   }, []);
 
   const addTodo = useCallback(() => {
+    if (isButtonDisabled) return;
+
     setTodoList([
-      ...todoList,
       { id: Date.now(), text: todoInput, completed: false },
+      ...todoList,
     ]);
     setTodoInput("");
-  }, [todoInput, todoList]);
+  }, [todoInput, todoList, isButtonDisabled]);
 
   const removeTodo = useCallback((id: number) => {
     setTodoList((prev) => prev.filter((todo) => todo.id !== id));
   }, []);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter") {
+        addTodo();
+      }
+    },
+    [addTodo]
+  );
 
   useEffect(() => {
     localStorage.setItem("todos", JSON.stringify(todoList));
   }, [todoList]);
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      <div className="m-auto bg-red-500 min-w-96 bg-slate-800/80 rounded-xl border border-slate-700">
-        <div className="p-4 flex flex-col gap-4">
+    <div className="flex min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-4 py-6 sm:p-2">
+      <div className="m-auto w-full max-w-2xl max-h-[calc(100vh-3rem)] flex flex-col bg-slate-800/80 rounded-xl border border-slate-700">
+        <div className="p-4 flex flex-col gap-4 flex-shrink-0">
           <div>
             <h1 className="text-2xl font-semibold text-white">Today's todo</h1>
             <p className="text-slate-400">
@@ -67,9 +78,10 @@ function App() {
               <input
                 type="text"
                 placeholder="Add todo..."
-                className="px-4 bg-slate-700/20 gap-3 rounded-xl text-white w-full"
+                className="px-4 py-3 bg-slate-700/20 rounded-xl text-white w-full"
                 value={todoInput}
                 onChange={(e) => onChangeValue(e.target.value)}
+                onKeyDown={handleKeyDown}
               />
               <button
                 onClick={addTodo}
@@ -84,18 +96,18 @@ function App() {
               </button>
             </div>
             {todoList.some((todo) => todo.text === todoInput.trim()) && (
-              <p className="text-red-700 text-sm">Todo already exists</p>
+              <p className="text-red-400 text-sm">Todo already exists</p>
             )}
           </div>
         </div>
 
         {todoList.length > 0 && (
-          <div className="flex flex-col p-4 gap-4">
+          <div className="flex flex-col p-4 gap-4 overflow-y-auto">
             {todoList.map(({ id, text, completed }) => {
               return (
                 <div
                   key={id}
-                  className="flex px-4 py-3 bg-slate-700/20 rounded-xl justify-between items-center"
+                  className="flex px-4 py-3 bg-slate-700/20 rounded-xl justify-between items-center flex-shrink-0"
                 >
                   <div className="flex items-center gap-3">
                     <button
@@ -121,7 +133,7 @@ function App() {
                   </div>
                   <button
                     onClick={() => removeTodo(id)}
-                    className="text-slate-400 cursor-pointer"
+                    className="text-slate-400 hover:text-slate-200 cursor-pointer transition"
                   >
                     ✕
                   </button>
