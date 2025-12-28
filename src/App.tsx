@@ -7,9 +7,10 @@ interface Todo {
 }
 
 function App() {
-  const [todoList, setTodoList] = useState<Todo[]>(
-    JSON.parse(localStorage.getItem("todos") ?? "")
-  );
+  const [todoList, setTodoList] = useState<Todo[]>(() => {
+    const saved = localStorage.getItem("todos");
+    return saved ? JSON.parse(saved) : [];
+  });
   const [todoInput, setTodoInput] = useState("");
 
   const totalCompleted = useMemo(() => {
