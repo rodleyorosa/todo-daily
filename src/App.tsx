@@ -6,12 +6,60 @@ interface Todo {
   completed: boolean;
 }
 
+interface TodoStorage {
+  todos: Todo[];
+  date: string;
+}
+
+function getToday(): string {
+  return new Date().toISOString().split("T")[0];
+}
+
+function getTimeUntilMidnight(): string {
+  const now = new Date();
+  const tomorrow = new Date(now);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(0, 0, 0, 0);
+
+  const diff = tomorrow.getTime() - now.getTime();
+
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+  return `${hours}h ${minutes}m ${seconds}s`;
+}
+
 function App() {
   const [todoList, setTodoList] = useState<Todo[]>(() => {
     const saved = localStorage.getItem("todos");
-    return saved ? JSON.parse(saved) : [];
+    if (!saved) return [];
+
+    try {
+      const data: TodoStorage = JSON.parse(saved);
+      const today = getToday();
+
+      if (data.date !== today) {
+        localStorage.removeItem("todos");
+        return [];
+      }
+
+      return data.todos;
+    } catch {
+      return [];
+    }
   });
+
   const [todoInput, setTodoInput] = useState("");
+  const [timeRemaining, setTimeRemaining] = useState(getTimeUntilMidnight());
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeRemaining(getTimeUntilMidnight());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const totalCompleted = useMemo(() => {
     return todoList.filter((todo) => todo.completed).length;
@@ -60,7 +108,11 @@ function App() {
   );
 
   useEffect(() => {
-    localStorage.setItem("todos", JSON.stringify(todoList));
+    const storage: TodoStorage = {
+      todos: todoList,
+      date: getToday(),
+    };
+    localStorage.setItem("todos", JSON.stringify(storage));
   }, [todoList]);
 
   return (
@@ -71,6 +123,9 @@ function App() {
             <h1 className="text-2xl font-semibold text-white">Today's todo</h1>
             <p className="text-slate-400">
               {totalCompleted}/{todoList.length} completed
+            </p>
+            <p className="text-slate-500 text-sm mt-1">
+              The list will automatically reset in {timeRemaining}
             </p>
           </div>
           <div className="flex flex-col gap-1">
