@@ -40,8 +40,13 @@ function App() {
       const today = getToday();
 
       if (data.date !== today) {
-        localStorage.removeItem("todos");
-        return [];
+        const incompleteTodos = data.todos.filter((todo) => !todo.completed);
+        const newStorage: TodoStorage = {
+          todos: incompleteTodos,
+          date: today,
+        };
+        localStorage.setItem("todos", JSON.stringify(newStorage));
+        return incompleteTodos;
       }
 
       return data.todos;
