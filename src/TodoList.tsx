@@ -42,14 +42,16 @@ export const TodoList = ({ todoList, setTodoList }: TodoListProps) => {
               <button
                 onClick={() => toggleCompleted(id)}
                 className={
-                  "h-6 w-6 rounded-full border-2 flex items-center justify-center transition " +
+                  "h-6 w-6 rounded-full border-2 flex items-center justify-center transition flex-shrink-0 " +
                   (completed
-                    ? "border-emerald-400 bg-emerald-400"
-                    : "border-slate-500 group-hover:border-indigo-400")
+                    ? "border-emerald-500 bg-emerald-500"
+                    : "border-slate-500 hover:border-indigo-400")
                 }
               >
                 {completed && (
-                  <span className="text-xs font-bold text-black">✓</span>
+                  <svg className="w-4 h-4 text-white" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" viewBox="0 0 24 24" stroke="currentColor">
+                    <path d="M5 13l4 4L19 7"></path>
+                  </svg>
                 )}
               </button>
               <label
